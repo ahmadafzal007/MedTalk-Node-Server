@@ -1,15 +1,18 @@
 const express = require('express');
 
-const router = express.Router();
+const ServerRouter = express.Router();
 const AdminRouter = require('./AdminRoutes')
 const HealthCareCenterRouter = require('./HealthCareCenterRoutes')
 const HealthCareProfessionalRouter = require('./HealthCareProfessionalRoutes')
 const ScholarRouter = require('./ScholarRoutes')
-
-router.get("/admin",AdminRouter)
-router.get('/healthCareCenter',HealthCareCenterRouter)
-router.get('/healthCareProfessional',HealthCareProfessionalRouter)
-router.get('/scholar',ScholarRouter)
+const AuthRouter = require('./AuthRoutes');
 
 
-module.exports = router
+router.use("/admin",AdminRouter)
+router.use('/healthCareCenter',HealthCareCenterRouter)
+router.use('/healthCareProfessional',HealthCareProfessionalRouter)
+router.use('/scholar',ScholarRouter),
+router.use("/auth",AuthRouter)
+
+
+module.exports = ServerRouter

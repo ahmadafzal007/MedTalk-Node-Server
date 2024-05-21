@@ -1,12 +1,22 @@
 const express = require('express');
 const AuthRouter  = express.Router();
+const AuthController = require('../../controllers/AuthController');
 
 
-AuthRouter.get('/'),(req,res,next)=>{
-  res.status(200).json({
-    "message":"This is auth router"
-  })
-}
+
+
+AuthRouter.post("/register", AuthController.signup)
+AuthRouter.post("/login", AuthController.login)
+
+
+//  healthcare professionals
+// healthcare Centers
+// Scholar
+// admin
+
+
+
+
 
 
 module.exports = AuthRouter;

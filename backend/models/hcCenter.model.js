@@ -3,11 +3,10 @@ const mongoose = require('mongoose');
 
 
 const healthCareCenterSchema = new mongoose.Schema({
-  name: { type: String, required: true },
+  user: {type: mongoose.Schema.Types.ObjectId, ref: 'User'},
   address: { type: String, required: true },
   contactNumber: { type: String, required: true },
   password: { type: String, required: true},
-  email: { type: String, required: true, unique: true },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
   HealthCareProfessionals:[
@@ -15,8 +14,10 @@ const healthCareCenterSchema = new mongoose.Schema({
       type:mongoose.Schema.Types.ObjectId, ref:"HealthCareProfessional"
     }
   ],
-  VerificationStatus:{
-    type:Boolean, default: false,
+  verificationStatus:{
+    type:String,
+    default:"pending",
+    enum:["pending","verified","rejected"]
   }
 });
 

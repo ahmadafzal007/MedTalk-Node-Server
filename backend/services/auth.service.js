@@ -5,6 +5,8 @@ const healthCareProfessionalModel = require('../models/hcProfessional.model');
   const healthCareCenterAdminModel = require('../models/hcCenterAdmin.model');
 const scholarModel = require('../models/scholar.model');
 
+const healthCareProfessional = require('../services/hcProfessional.service');
+
 const AuthService = {
   async login(email, password, role) {
     const user = await userModel.findOne({ email });
@@ -34,8 +36,7 @@ const AuthService = {
     return {
       error: false,
       user: {
-        firstName: user.firstName,
-        lastName: user.lastName,
+        name: user.name,
         email: user.email,
         role: user.role,
         id: user._id
@@ -44,58 +45,49 @@ const AuthService = {
     };
   },
 
-  async signup(email, password, name, role, department, healthCareCenterId) {
-    if (await userService.emailExists(email)) {
-      return {
-        error: true,
-        message: 'Email already exists'
-      };
-    }
+  // 'healthcareProfessional', 'admin','scholar'
 
-    const user = new userModel({
-      email,
-      passwordHash: password, // Make sure to hash the password in production
-      name,
-      role
-    });
+  async signup(role,req) {
+    const {name,email,password} = req;
 
-    await user.save();
-
-    if (role.toLowerCase() === 'healthcareprofessional') {
-      const healthCareProfessional = new healthCareProfessionalModel({
-        user: user._id,
-        department,
-        healthCareCenterId
-      });
-
-      await healthCareProfessional.save();
-    } else if (role.toLowerCase() === 'healthcarecenteradmin') {
-      const healthCareCenterAdmin = new healthCareCenterAdminModel({
-        user: user._id
-      });
-
-      await healthCareCenterAdmin.save();
-    } else if (role.toLowerCase() === 'scholar') {
-      const scholar = new scholarModel({
-        user: user._id
-      });
-
-      await scholar.save();
-    }
-
-    const token = generateToken(user._id, user.role);
-
-    return {
-      error: false,
-      user: {
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-        role: user.role,
-        id: user._id
-      },
-      token
+    let error= {
+      "message":'',
+      status:0
     };
+
+      if (role === 'healthcareProfessional'){
+        const {department , healthCareCenterId} = req;
+        if (!department  || !healthCareCenterId){
+          error.message = "Department or Id missing";
+          error.status = 401
+          return error
+        }
+
+        const user = await userService.createUser(name,email,password,role);
+        const professional = await healthCareProfessional.createHealthCareProfessional(
+          user._id , healthCareCenterId , department
+        );
+        return professional
+        
+      }else if (role === "scholar"){
+          const user = await userService.createUser(email,password,name,role);
+          return user;
+      }else if (role === "hospitalAdmin"){
+          const {address,contactNumber} = req;
+          if (!address || !contactNumber){
+            error.message = "Address or contact number missing";
+            error.status = 401
+            return error
+          }
+          const user = await userService.createUser(email,password,name,role);
+          const admin = await healthCareCenterAdminModel.create({
+            user:user._id,
+            address,
+            contactNumber
+          });
+
+          return admin;
+      }
   }
 };
 

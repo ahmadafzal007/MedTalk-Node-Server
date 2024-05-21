@@ -9,7 +9,9 @@ const healthCareProfessionalSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
   VerificationStatus:{
-    type:Boolean, default: false,
+    type:String,
+    default:"pending",
+    enum:["pending","verified","rejected"]
   } 
 });
 

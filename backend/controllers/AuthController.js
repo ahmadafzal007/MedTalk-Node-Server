@@ -31,10 +31,13 @@ const AuthController = {
     },
 
     async signup(req, res,next) {
+
         try{
-            const {email,password,firstName , lastName,role} = req.body;
+            const {role} = req.body;
+
             console.log("POST /signup called ")
-            const user = await userAuth.signup(email,password,firstName, lastName,role);
+
+            const user = await userAuth.signup(role,req.body);
             if (user.error) {
                 const error = {
                     status: 401,

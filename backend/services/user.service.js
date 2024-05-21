@@ -1,9 +1,9 @@
 const userModel = require('../models/user.model');
 
 const UserService = {
-    async createUser(email, password, firstName,lastName, role) {
+    async createUser(email, password, name, role) {
         // create user
-        const user = await userModel.create({ email, password, firstName,lastName, role });
+        const user = await userModel.create({ email, password,name, role });
         return  user;
 
     },

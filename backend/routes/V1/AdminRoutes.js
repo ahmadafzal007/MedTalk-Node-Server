@@ -1,12 +1,9 @@
 const express = require('express');
 const AdminRouter  = express.Router();
+const AdminController = require('../../controllers/AdminController');
 
 
-AdminRouter.get('/'),(req,res,next)=>{
-  res.status(200).json({
-    "message":"This is admin router"
-  })
-}
+AdminRouter.post('/verifyCenter', AdminController.verifyCenter);
 
 
 module.exports = AdminRouter;
