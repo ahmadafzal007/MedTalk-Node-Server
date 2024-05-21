@@ -5,6 +5,7 @@ const app = express();
 
 const router = require('./routes/V1/IndexRoutes')
 
+console.log("FUck you choudary ")
 app.get('/api',router)
 
 app.listen(3000,()=>{
