@@ -21,5 +21,35 @@ const healthCareCenterController = {
         }catch(error){
             return next(error);
         }
+    },
+
+    async getHospitals(req,res,next){
+        try{
+            const hospitals = await hcAdmin.getHospitals();
+            return res.status(200).json({
+                "hospitals": hospitals
+            });
+
+        }catch(error){
+            return next(error);
+        }
+    },
+
+    async getPendingProfessionals(req, res, next) {
+        try {
+            console.log(req.user)
+            console.log(req.user._id)
+            const users = await hcAdmin.getPendingProfessionals(req.user._id);
+            if (users.error) {
+                return res.status(404).json({ message: "No user found" });
+            }
+            res.status(200).json({ users });
+        } catch (error) {
+            return next(error);
+        }
     }
+
+
 }
+
+module.exports = healthCareCenterController;

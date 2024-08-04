@@ -42,6 +42,87 @@ const healthCareCenterAdminService = {
                 message:error.message
             }
         }
+    },
+
+    getHospitals: async () => {
+        try {
+            // const hospitals = await healthCareCenterAdminModel.aggregate([
+            //     {
+            //         $group: {
+            //             _id: "$hospitalName",
+            //             name: { $first: '$hospitalName' }
+            //         }
+            //     },
+            //     {
+            //         $project: {
+            //             _id: 0,
+            //             name: 1
+            //         }
+            //     }
+            // ]);
+            const hospitals = await healthCareCenterAdminModel.find({});
+
+            console.log(hospitals);
+            return hospitals;
+        } catch (error) {
+            console.error("Error retrieving hospitals:", error);
+            return {
+                status: 403,
+                error: "Couldn't find hospitals"
+            };
+        }
+    },
+
+    getPendingProfessionals: async (_id) => {
+        console.log("I am here")
+        try {
+            const hospital = await healthCareCenterAdminService.getHospital(_id);
+            console.log(hospital);
+            if (hospital.error) {
+                return {
+                    error: true,
+                    message: hospital.message
+                };
+            }
+
+            const pendingProfessionals = await healthCareProfessionalModel.find({
+                VerificationStatus: 'pending',
+                hospitalName: hospital.hospitalName
+            }).populate('user').select('department healthCareCenterId hospitalName VerificationStatus');;
+
+            console.log("pending professional",pendingProfessionals);
+
+            return pendingProfessionals;
+        } catch (error) {
+            console.error('Error retrieving pending professionals:', error);
+            return {
+                error: true,
+                message: "Internal server error"
+            };
+        }
+    },
+
+
+    
+    getHospital: async (_id) => {
+        console.log("gethospital",_id)
+        try {
+            const hospital = await healthCareCenterAdminModel.findOne({user:_id});
+            console.log('hospital ' , hospital);
+            if (!hospital) {
+                return {
+                    error: true,
+                    message: "Hospital not found"
+                };
+            }
+            return hospital;
+        } catch (error) {
+            console.error("Error retrieving hospital:", error);
+            return {
+                error: true,
+                message: "Internal server error"
+            };
+        }
     }
 }
 

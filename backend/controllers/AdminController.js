@@ -1,4 +1,4 @@
-const AdminService = require('../services/AdminService');
+const AdminService = require('../services/admin.service');
 
 const AdminController = {
     async verifyCenter(req, res, next) {

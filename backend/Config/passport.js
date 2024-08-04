@@ -10,7 +10,7 @@ const opts = {
 };
 
 module.exports = (passport) => {
-    console.log(1)
+    console.log(" hiii ")
     passport.use(
         new JWTStrategy(opts, async (jwt_payload, done) => {
             try {

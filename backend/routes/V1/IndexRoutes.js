@@ -8,11 +8,11 @@ const ScholarRouter = require('./ScholarRoutes')
 const AuthRouter = require('./AuthRoutes');
 
 
-router.use("/admin",AdminRouter)
-router.use('/healthCareCenter',HealthCareCenterRouter)
-router.use('/healthCareProfessional',HealthCareProfessionalRouter)
-router.use('/scholar',ScholarRouter),
-router.use("/auth",AuthRouter)
+ServerRouter.use("/admin",AdminRouter)
+ServerRouter.use('/healthCareCenter',HealthCareCenterRouter)
+ServerRouter.use('/healthCareProfessional',HealthCareProfessionalRouter)
+ServerRouter.use('/scholar',ScholarRouter),
+ServerRouter.use("/auth",AuthRouter)
 
 
 module.exports = ServerRouter

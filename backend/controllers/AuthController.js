@@ -4,6 +4,7 @@ const AuthController = {
 
     async login(req, res,next) {
         console.log("POST /login called ")
+        // console.log(req.body)
         const {email,password,role} = req.body;
 
         if (!email || !password) {
@@ -11,6 +12,7 @@ const AuthController = {
         }
         try{
             const user = await userAuth.login(email,password,role);
+            console.log(user)
             if (user.error) {
                 const error = {
                     status: 401,
@@ -38,11 +40,13 @@ const AuthController = {
             console.log("POST /signup called ")
 
             const user = await userAuth.signup(role,req.body);
+            console.log("Userrrr , in controlelr ",user)
             if (user.error) {
                 const error = {
                     status: 401,
                     message: user.message
                 }
+                console.log(error);
                 return next(error);
             }
             res.status(200).json({
