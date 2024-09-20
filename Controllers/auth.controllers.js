@@ -61,7 +61,6 @@ exports.registerUser = async (req, res, next) => {
 };
 
 
-
 exports.registerDoctor = async (req, res, next) => {
   try {
     const {
@@ -73,13 +72,14 @@ exports.registerDoctor = async (req, res, next) => {
       medicalLicenseNumber,
       specialization,
       department,
-      hospitalAssociated,
+      hospitalName,
       profileImage
     } = req.body;
 
-    // Check for required fields
-    if (!name || !email || !password || !phoneNumber || !medicalLicenseNumber || !specialization || !department || !hospitalAssociated || !gender) {
-      return res.status(400).json({ message: 'All fields are required' });
+    // Check if the hospital exists in the User collection
+    const hospitalUser = await User.findOne({ name: hospitalName });
+    if (!hospitalUser) {
+      return res.status(404).json({ message: 'The specified hospital does not exist' });
     }
 
     // Check if email already exists
@@ -115,7 +115,7 @@ exports.registerDoctor = async (req, res, next) => {
       medicalLicenseNumber,
       specialization,
       department,
-      hospitalAssociated,
+      hospitalAssociated: hospitalUser._id, // Associate with the correct hospital user
     });
 
     await doctor.save();
@@ -156,72 +156,80 @@ exports.registerDoctor = async (req, res, next) => {
   }
 };
 
+
+
 // Register a hospital
 exports.registerHospital = async (req, res, next) => {
   try {
-    const { name, email, password, phoneNumber, registrationLicenseNumber, hospitalType, address, country, profileImage, websiteURL } = req.body;
+      const { name, email, password, phoneNumber, registrationLicenseNumber, hospitalType, address, country, profileImage, websiteURL } = req.body;
 
-    if (!name || !email || !password || !phoneNumber || !registrationLicenseNumber || !hospitalType || !address || !country) {
-      return res.status(400).json({ message: 'All fields are required' });
-    }
+      // Validate required fields
+      if (!name || !email || !password || !phoneNumber || !registrationLicenseNumber || !hospitalType || !address || !country) {
+          return res.status(400).json({ message: 'All fields are required' });
+      }
 
-    // Check if email already exists
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({ message: 'Email already registered' });
-    }
+      // Check if email already exists
+      const existingUser = await User.findOne({ email });
+      if (existingUser) {
+          return res.status(400).json({ message: 'Email already registered' });
+      }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+      // Check if registration license number already exists
+      const existingHospital = await Hospital.findOne({ registrationLicenseNumber });
+      if (existingHospital) {
+          return res.status(400).json({ message: 'Registration license number already exists' });
+      }
 
-    // Create a User first
-    const user = new User({
-      name,
-      email,
-      profileImage,
-      password: hashedPassword,
-      role: 'hospital',
-    });
+      const hashedPassword = await bcrypt.hash(password, 10);
 
-    await user.save();
+      // Create a User first
+      const user = new User({
+          name,
+          email,
+          profileImage,
+          password: hashedPassword,
+          role: 'hospital',
+      });
 
-    // Create the Hospital profile
-    const hospital = new Hospital({
-      user: user._id,
-      phoneNumber,
-      websiteURL,
-      registrationLicenseNumber,
-      hospitalType,
-      address,
-      country,
-    });
+      await user.save();
 
-    await hospital.save();
+      // Create the Hospital profile
+      const hospital = new Hospital({
+          user: user._id,
+          phoneNumber,
+          websiteURL,
+          registrationLicenseNumber,
+          hospitalType,
+          address,
+          country,
+      });
 
-    
-    const accessToken = generateToken(user._id, user.role);
-    const refreshToken = generateRefreshToken(user._id, user.role); // Function to generate refresh token
+      await hospital.save();
 
-    await storeRefreshToken(refreshToken, user._id);
+      const accessToken = generateToken(user._id, user.role);
+      const refreshToken = generateRefreshToken(user._id, user.role); // Function to generate refresh token
 
-    // sending token in cookies
-    res.cookie("accessToken", accessToken, {
-      maxAge: 1000 * 60 * 60 * 24,
-      httpOnly: true,
-    });
+      await storeRefreshToken(refreshToken, user._id);
 
-    res.cookie("refreshToken", refreshToken, {
-      maxAge: 1000 * 60 * 60 * 24,
-      httpOnly: true,
-    });
+      // Sending token in cookies
+      res.cookie("accessToken", accessToken, {
+          maxAge: 1000 * 60 * 60 * 24,
+          httpOnly: true,
+      });
 
-    res.status(201).json({
-      message: 'Hospital registered successfully',
-      hospital,
-      accessToken,
-      refreshToken,
-    });
+      res.cookie("refreshToken", refreshToken, {
+          maxAge: 1000 * 60 * 60 * 24,
+          httpOnly: true,
+      });
+
+      res.status(201).json({
+          message: 'Hospital registered successfully',
+          hospital,
+          accessToken,
+          refreshToken,
+      });
   } catch (err) {
-    next(err);
+      next(err);
   }
 };
 

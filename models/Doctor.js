@@ -9,8 +9,10 @@ const doctorSchema = new Schema({
   specialization: { type: String, required: true }, // E.g. Cardiologist, Pediatrician
   department: { type: String, required: true }, // E.g. Cardiology, Surgery
   hospitalAssociated: { type: Schema.Types.ObjectId, ref: 'Hospital', required: true }, // Reference to hospital
-  authorizationStatus: { type: Boolean, default: false } // Authorization status
- 
+  authorizationStatus: { type: Boolean, default: false }, // Authorization status
+  chatWindows: [
+    { type: Schema.Types.ObjectId, ref: 'Chat' } // Reference to multiple chat windows
+  ]
 }, { timestamps: true });
 
 const Doctor = mongoose.model('Doctor', doctorSchema);

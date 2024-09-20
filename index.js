@@ -37,6 +37,14 @@ app.use('/api/users', userRoutes);
 const doctorRoutes = require('./Routes/doctor.routes');
 app.use('/api/doctor', doctorRoutes);
 
+
+const hospitalRoutes = require('./Routes/hospital.routes.js');
+app.use('/api/hospital', hospitalRoutes);
+
+
+const adminRoutes = require('./Routes/admin.routes');
+app.use('/api/admin', adminRoutes);
+
 app.use(errorMiddleware)
 
 app.listen(3000,()=>{

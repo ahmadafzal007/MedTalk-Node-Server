@@ -1,6 +1,8 @@
 const User = require('../models/User.js');
 const Doctor = require('../models/Doctor');
 const mongoose = require('mongoose');
+const Hospital = require('../models/Hospital');
+
 
 
 // View profile controller
@@ -65,10 +67,9 @@ exports.updateUserProfile = async (req, res, next) => {
 
 
 
-
 exports.upgradeToDoctor = async (req, res) => {
   const userId = req.user._id; // Get user ID from authenticated user
-  const { phoneNumber, gender, medicalLicenseNumber, specialization, department, hospitalAssociated } = req.body;
+  const { phoneNumber, gender, medicalLicenseNumber, specialization, department, hospitalName, profileImage } = req.body;
 
   try {
       // Check if the user exists
@@ -83,8 +84,20 @@ exports.upgradeToDoctor = async (req, res) => {
       }
 
       // Check if the required fields are provided
-      if (!phoneNumber || !gender || !medicalLicenseNumber || !specialization || !department || !hospitalAssociated) {
+      if (!phoneNumber || !gender || !medicalLicenseNumber || !specialization || !department || !hospitalName) {
           return res.status(400).json({ message: 'All fields are required' });
+      }
+
+      // Find the hospital by name
+      const hospital = await User.findOne({ name: hospitalName }); // Assuming hospital has a 'name' field
+      if (!hospital) {
+          return res.status(404).json({ message: 'Hospital not found' });
+      }
+
+      // Check if the medical license number already exists
+      const existingDoctor = await Doctor.findOne({ medicalLicenseNumber });
+      if (existingDoctor) {
+          return res.status(400).json({ message: 'Medical license number already exists' });
       }
 
       // Create a new doctor document
@@ -95,7 +108,8 @@ exports.upgradeToDoctor = async (req, res) => {
           medicalLicenseNumber,
           specialization,
           department,
-          hospitalAssociated,
+          hospitalAssociated: hospital._id, // Use the hospital's ID
+          profileImage, // Include profile image if necessary
           authorizationStatus: false // Initially set to false
       });
 
@@ -112,6 +126,3 @@ exports.upgradeToDoctor = async (req, res) => {
       res.status(500).json({ message: 'Server error' });
   }
 };
-
-
-

@@ -7,8 +7,8 @@ const userSchema = new Schema({
   profileImage: { type: String }, // URL of profile image
   password: { type: String, required: true },
   role: { type: String, enum: ['user','doctor', 'hospital', 'admin'], required: true },
-  chatHistory: [
-    { type: Schema.Types.ObjectId, ref: 'Chat' } // Reference to chat history
+  chatWindows: [
+    { type: Schema.Types.ObjectId, ref: 'Chat' } // Reference to multiple chat windows
   ]
 }, { timestamps: true });
 
