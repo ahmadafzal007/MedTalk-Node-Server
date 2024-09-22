@@ -29,6 +29,7 @@ module.exports = (passport) => {
             }
     
             console.log('User and refresh token validated successfully');
+            // console.log(user)
             return done(null, user);
     
         } catch (err) {

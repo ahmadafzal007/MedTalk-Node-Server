@@ -4,6 +4,8 @@ const { Schema } = mongoose;
 const messageSchema = new Schema({
   prompt: { type: String, required: true }, // User's prompt
   response: { type: String, required: true }, // System's response
+  plot_url: { type: String }, // Optional image URL
+  image_url: { type: String }, // Optional image URL
   timestamp: { type: Date, default: Date.now }
 });
 

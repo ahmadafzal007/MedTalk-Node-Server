@@ -6,13 +6,25 @@ const passport = require('passport');
 const errorMiddleware = require('./middleware/error.middleware')
 const dotenv = require('dotenv')
 const cookieParser = require('cookie-parser');
-
-
-
+const http = require('http');
+const { Server } = require('socket.io');
 
 dotenv.config();
 console.log(process.env.JWT_SECRET);
 console.log(process.env.JWT_Refresh_SECRET);
+
+
+
+const server = http.createServer(app);
+// Set up Socket.io
+const io = new Server(server, {
+  cors: {
+    origin: '*', // Allow requests from any origin (adjust if needed for security)
+    methods: ['GET', 'POST'],
+  },
+});
+
+
 
 app.use(cors());
 app.use(express.json());
@@ -45,9 +57,31 @@ app.use('/api/hospital', hospitalRoutes);
 const adminRoutes = require('./Routes/admin.routes');
 app.use('/api/admin', adminRoutes);
 
+
+// Chat routes require access to Socket.io for real-time updates
+const chatRoutes = require('./Routes/chat.routes');
+app.use('/api/chat', (req, res, next) => {
+  req.io = io; // Make Socket.io instance available in the chat routes
+  next();
+}, chatRoutes);
+
+
+
 app.use(errorMiddleware)
 
 app.listen(3000,()=>{
   console.log("listening on port 3000")
   connectToDb()
 })
+
+
+
+// Listen for new connections on Socket.io
+io.on('connection', (socket) => {
+  console.log('A user connected');
+
+  // Handle the disconnection event
+  socket.on('disconnect', () => {
+    console.log('A user disconnected');
+  });
+});
