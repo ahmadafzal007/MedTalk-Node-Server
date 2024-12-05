@@ -1,5 +1,5 @@
 const express = require('express');
-const { createChatWindow, getUserChats, handleChatRequest } = require('../Controllers/chat.controller');
+const { createChatWindow, getUserChats, handleChatRequest, getChatWindowById, getChatsWithoutPatient, getChatsWithPatient } = require('../Controllers/chat.controller');
 const passport = require('passport');
 const checkAuthorization = require('../middleware/checkAuthorization');
 
@@ -22,6 +22,29 @@ router.get(
   checkAuthorization, // Ensure that user/doctor is authorized
   getUserChats
 );
+
+
+router.post(
+  '/my-chat',
+  passport.authenticate('jwt', { session: false }),
+  checkAuthorization, // Ensure that user/doctor is authorized
+  getChatWindowById
+)
+
+router.get(
+  '/chat-without-patient',
+  passport.authenticate('jwt', { session: false }),
+  checkAuthorization, // Ensure that user/doctor is authorized
+  getChatsWithoutPatient
+)
+
+
+router.get(
+  '/chat-with-patient',
+  passport.authenticate('jwt', { session: false }),
+  checkAuthorization, // Ensure that user/doctor is authorized
+  getChatsWithPatient
+)
 
 
 // Route to handle chat request, forward to FastAPI, and store response in DB

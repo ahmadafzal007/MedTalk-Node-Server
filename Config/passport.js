@@ -6,7 +6,7 @@ const RefreshToken = require('../models/RefreshToken');
 // Configure options for JWT Strategy
 const opts = {
     jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
-    secretOrKey: process.env.JWT_SECRET || 'vskhskljfjalj84390qnf0', // Ensure this matches the secret used in token generation
+    secretOrKey: process.env.JWT_SECRET || 'vskhskljfjalj84390qnf0', 
 };
 
 module.exports = (passport) => {

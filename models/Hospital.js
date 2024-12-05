@@ -4,7 +4,6 @@ const { Schema } = mongoose;
 const hospitalSchema = new Schema({
   user: { type: Schema.Types.ObjectId, ref: 'User', required: true }, // Reference to user
   phoneNumber: { type: String, required: true },
-  websiteURL: { type: String }, // Optional website
   registrationLicenseNumber: { type: String, required: true, unique: true },
   hospitalType: { type: String, enum: ['private', 'public', 'non-profit'], required: true },
   address: { type: String, required: true },

@@ -69,8 +69,8 @@ exports.updateUserProfile = async (req, res, next) => {
 
 exports.upgradeToDoctor = async (req, res) => {
   const userId = req.user._id; // Get user ID from authenticated user
-  const { phoneNumber, gender, medicalLicenseNumber, specialization, department, hospitalName, profileImage } = req.body;
-
+  const { phoneNumber, gender, medicalLicenseNumber,  department, hospitalName,  cnic } = req.body;
+  console.log(req.body)
   try {
       // Check if the user exists
       const user = await User.findById(userId);
@@ -84,7 +84,7 @@ exports.upgradeToDoctor = async (req, res) => {
       }
 
       // Check if the required fields are provided
-      if (!phoneNumber || !gender || !medicalLicenseNumber || !specialization || !department || !hospitalName) {
+      if (!phoneNumber || !gender || !medicalLicenseNumber || !department || !hospitalName || !cnic) {
           return res.status(400).json({ message: 'All fields are required' });
       }
 
@@ -106,10 +106,9 @@ exports.upgradeToDoctor = async (req, res) => {
           phoneNumber,
           gender,
           medicalLicenseNumber,
-          specialization,
           department,
+          cnic,
           hospitalAssociated: hospital._id, // Use the hospital's ID
-          profileImage, // Include profile image if necessary
           authorizationStatus: false // Initially set to false
       });
 

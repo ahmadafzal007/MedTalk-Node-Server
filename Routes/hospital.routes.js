@@ -25,7 +25,7 @@ router.patch('/unauthorizeDoctor',passport.authenticate('jwt', { session: false 
 router.delete('/deleteDoctor', passport.authenticate('jwt', { session: false }) , deleteDoctor); // Use DELETE for removing a doctor
 
 // Route to view authorized hospitals
-router.get('/viewAuthorizedHospitals',  passport.authenticate('jwt', { session: false }) ,viewAuthorizedHospitals); // New route
+router.get('/viewAuthorizedHospitals' ,viewAuthorizedHospitals); // New route
 
 
 // Route to view hospital profile

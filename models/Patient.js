@@ -20,3 +20,7 @@ patientSchema.methods.canViewDetails = function (doctorId) {
 
 const Patient = mongoose.model('Patient', patientSchema);
 module.exports = Patient;
+
+
+
+

@@ -64,6 +64,7 @@ const FormData = require('form-data');
 
 
 exports.createChatWindow = async (req, res) => {
+  console.log("Chat window request received create")
   try {
 
     const  userId  = req.user._id; // Assuming user ID is in req.user (from JWT auth)
@@ -269,7 +270,7 @@ exports.handleChatRequest = async (req, res, next) => {
     // console.log('Parsed files:', files);   // Logs file fields (like image, csv)
 
     const prompt = Array.isArray(fields.prompt) ? fields.prompt[0] : fields.prompt;
-    const { chatId, previousMessage } = fields;
+    const { chatId } = fields;
     const image = files.image && files.image.length > 0 ? files.image[0].filepath : null;
     // const csv = files.csv ? files.csv.filepath : null;
     const csv = files.csv && files.csv.length > 0 ? files.csv[0].filepath : null;
@@ -284,14 +285,39 @@ exports.handleChatRequest = async (req, res, next) => {
       }
 
       console.log('Image URL:', imageUrl);
+
+
+       // Fetch the previous message from the database
+       let previousMessage = null;
+       const chatWindow = await Chat.findById(chatId);
+ 
+       if (!chatWindow) {
+         return res.status(404).json({ message: 'Chat window not found' });
+       }
+
+
+
+       if (chatWindow.messages && chatWindow.messages.length > 0) {
+        const lastMessage = chatWindow.messages[chatWindow.messages.length - 1];
+        // previousMessage = {
+        //   prompt: lastMessage.prompt,
+        //   response: lastMessage.response,
+        // };
+                // Stringify the previous message
+        previousMessage = `Prompt: ${lastMessage.prompt}, Response: ${lastMessage.response}`;
+      }
+
+      console.log("Previous prompt",previousMessage)
+
+
       // Send request to FastAPI and get the response
       const fastApiResponse = await sendToFastApi(prompt, imageUrl ? image : null, csv, previousMessage);
 
       // Find the chat by chatId
-      const chatWindow = await Chat.findById(chatId);
-      if (!chatWindow) {
-        return res.status(404).json({ message: 'Chat window not found' });
-      }
+      // const chatWindow = await Chat.findById(chatId);
+      // if (!chatWindow) {
+      //   return res.status(404).json({ message: 'Chat window not found' });
+      // }
 
       // Add the FastAPI response to the chat messages
       const newMessage = {
@@ -320,3 +346,96 @@ exports.handleChatRequest = async (req, res, next) => {
     }
   });
 };
+
+
+
+
+
+
+// Controller to fetch a single chat window by its ID
+exports.getChatWindowById = async (req, res) => {
+  try {
+    const {chatId} = req.body;
+
+    if (!chatId) {
+      return res.status(400).json({ message: 'Chat ID is required' });
+    }
+
+    // Find chat by ID and populate user and patient details if needed
+    const chat = await Chat.findById(chatId)
+      .populate('users', 'name email')  // Populating 'users' with only 'name' and 'email' fields
+      .populate('patient', 'name') // Optionally populate 'patient' with only 'name'
+      .exec();
+
+    if (!chat) {
+      return res.status(404).json({ message: 'Chat not found' });
+    }
+
+    // Respond with the chat data
+    res.status(200).json(chat);
+  } catch (error) {
+    console.error('Error fetching chat window:', error);
+    res.status(500).json({ message: 'Server error', error });
+  }
+};
+
+
+
+
+exports.getChatsWithoutPatient = async (req, res) => {
+  try {
+    const doctorId = req.user._id; // Assuming the doctor ID is stored in req.user after authentication
+
+    // Find all chat windows where the patient is not associated (patient is null)
+    const chats = await Chat.find({
+      users: doctorId,
+      patient: null // No patient associated
+    })
+    .populate('users', 'name email')
+    .exec();
+
+    if (!chats || chats.length === 0) {
+      return res.status(404).json({ message: 'No chats without patient found' });
+    }
+
+    res.status(200).json(chats);
+  } catch (error) {
+    console.error('Error fetching chats without patients:', error);
+    res.status(500).json({ message: 'Server error', error });
+  }
+};
+
+
+
+
+
+
+
+
+// controllers/chatController.js
+
+// Fetch chat windows associated with a patient
+exports.getChatsWithPatient = async (req, res) => {
+  try {
+    const doctorId = req.user._id; // Assuming the doctor ID is stored in req.user after authentication
+
+    // Find all chat windows where a patient is associated (patient exists)
+    const chats = await Chat.find({
+      users: doctorId,
+      patient: { $ne: null } // Chat windows where patient is not null
+    })
+    .populate('users', 'name email')
+    .populate('patient', 'name')
+    .exec();
+
+    if (!chats || chats.length === 0) {
+      return res.status(404).json({ message: 'No chats with patients found' });
+    }
+
+    res.status(200).json(chats);
+  } catch (error) {
+    console.error('Error fetching chats with patients:', error);
+    res.status(500).json({ message: 'Server error', error });
+  }
+};
+

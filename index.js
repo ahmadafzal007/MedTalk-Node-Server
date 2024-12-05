@@ -6,6 +6,11 @@ const passport = require('passport');
 const errorMiddleware = require('./middleware/error.middleware')
 const dotenv = require('dotenv')
 const cookieParser = require('cookie-parser');
+const multer = require('multer');
+const JSZip = require('jszip');
+const fs = require('fs');
+const path = require('path');
+
 const http = require('http');
 const { Server } = require('socket.io');
 
@@ -30,6 +35,9 @@ app.use(cors());
 app.use(express.json());
 app.use(cookieParser()); 
 app.use(passport.initialize());
+app.use(express.urlencoded({ extended: true }));
+app.use('/dataset', express.static(path.join(__dirname, 'dataset')));
+
 
 
 
@@ -58,6 +66,15 @@ const adminRoutes = require('./Routes/admin.routes');
 app.use('/api/admin', adminRoutes);
 
 
+
+const uploadRoutes = require('./Routes/uploadRoutes.routes');
+app.use('/api/upload', uploadRoutes);
+
+const folderRoutes = require('./Routes/folderRoutes.routes');
+app.use('/api/folder', folderRoutes);
+
+
+
 // Chat routes require access to Socket.io for real-time updates
 const chatRoutes = require('./Routes/chat.routes');
 app.use('/api/chat', (req, res, next) => {
@@ -66,14 +83,16 @@ app.use('/api/chat', (req, res, next) => {
 }, chatRoutes);
 
 
+// Serve static files from the 'dataset' folder
+app.use('/datasets', express.static(path.join(__dirname, 'datasets')));
+
 
 app.use(errorMiddleware)
 
 app.listen(3000,()=>{
   console.log("listening on port 3000")
   connectToDb()
-})
-
+})  
 
 
 // Listen for new connections on Socket.io
@@ -85,3 +104,4 @@ io.on('connection', (socket) => {
     console.log('A user disconnected');
   });
 });
+

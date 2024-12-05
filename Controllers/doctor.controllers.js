@@ -68,9 +68,9 @@ exports.createPatient = async (req, res) => {
 
 exports.viewPatient = async (req, res) => {
     try {
-        const patientId = req.params.patientId;
+        const patientId = req.body.id;
         const doctorId = req.user.id; // Make sure to use the correct property
-
+        console.log(patientId);
         // Find the patient by ID
         const patient = await Patient.findById(patientId);
 
@@ -90,6 +90,8 @@ exports.viewPatient = async (req, res) => {
             cnic: patient.cnic,
             age: patient.age,
             id: patient._id,
+            chatid: patient.chatWindow,
+
         });
     } catch (error) {
         console.error('Error viewing patient:', error);
@@ -103,8 +105,8 @@ exports.getAllPatients = async (req, res) => {
         const doctorId = req.user.id; // Get the authenticated doctor's ID
 
         // Find all patients associated with the doctor
-        const patients = await Patient.find({ doctor: doctorId }).select('name cnic age _id');
-
+        const patients = await Patient.find({ doctor: doctorId }).select('name cnic age _id chatWindow');
+        // return chat window id along with patient info
         // Check if there are any patients
         if (patients.length === 0) {
             return res.status(404).json({ message: 'No patients found for this doctor.' });
@@ -124,7 +126,7 @@ exports.getAllPatients = async (req, res) => {
 exports.viewPatientChat = async (req, res) => {
     try {
         const doctorId = req.user._id; // Extracting doctor's ID from request user
-        const patientId = req.params.id; // Patient ID from route params
+        const patientId = req.body.id; // Patient ID from route params
 
         console.log("doctor id", doctorId);
         console.log("patient id", patientId);
@@ -191,6 +193,7 @@ exports.viewDoctorProfile = async (req, res) => {
             medicalLicenseNumber: doctor.medicalLicenseNumber,
             department: doctor.department,
             specialization: doctor.specialization,
+            cnic: doctor.cnic,
             associatedHospital: doctor.hospitalAssociated ? doctor.hospitalAssociated.name : 'Not associated with any hospital'
         });
     } catch (error) {
@@ -198,3 +201,43 @@ exports.viewDoctorProfile = async (req, res) => {
         res.status(500).json({ message: 'Server error.' });
     }
 };
+
+
+
+
+
+// Controller to search for a patient by CNIC
+exports.searchPatientByCNIC = async (req, res) => {
+    try {
+        const doctorId = req.user._id; // Extract doctor's ID from the request user
+        const { cnic } = req.body; // Get CNIC from route parameters
+  
+        // Validate that CNIC is provided
+        if (!cnic) {
+            return res.status(400).json({ message: 'CNIC is required.' });
+        }
+  
+        // Search for the patient by CNIC and ensure that the doctor owns the patient
+        const patient = await Patient.findOne({ cnic, doctor: doctorId });
+  
+        // Check if the patient was found
+        if (!patient) {
+            return res.status(404).json({ message: 'Patient not found.' });
+        }
+  
+        // Respond with the patient's details
+        res.status(200).json({
+            message: 'Patient found.',
+            patient: {
+                name: patient.name,
+                cnic: patient.cnic,
+                age: patient.age,
+                id: patient._id,
+                chatWindow: patient.chatWindow,
+            }
+        });
+    } catch (error) {
+        console.error('Error searching for patient:', error);
+        res.status(500).json({ message: 'Server error.' });
+    }
+  };

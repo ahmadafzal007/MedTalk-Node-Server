@@ -16,7 +16,7 @@ console.log(hospitalId);
         const unauthorizedDoctors = await Doctor.find({
             hospitalAssociated: hospitalId,
             authorizationStatus: false // Only unauthorized doctors
-        }).populate('user', 'name email phoneNumber'); // Populate user details, excluding password
+        }).populate('user', 'name email phoneNumber profileImage'); // Populate user details, excluding password
 
         // Check if there are unauthorized doctors
         if (unauthorizedDoctors.length === 0) {
@@ -53,7 +53,7 @@ exports.viewAuthorizedDoctors = async (req, res) => {
       const authorizedDoctors = await Doctor.find({
           hospitalAssociated: hospitalId,
           authorizationStatus: true // Only authorized doctors
-      }).populate('user', 'name email phoneNumber'); // Populate user details, excluding password
+      }).populate('user', 'name email phoneNumber profileImage'); // Populate user details, excluding password
 
       // Check if there are authorized doctors
       if (authorizedDoctors.length === 0) {

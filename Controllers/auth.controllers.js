@@ -70,7 +70,7 @@ exports.registerDoctor = async (req, res, next) => {
       phoneNumber,
       gender,
       medicalLicenseNumber,
-      specialization,
+      cnic,
       department,
       hospitalName,
       profileImage
@@ -82,6 +82,7 @@ exports.registerDoctor = async (req, res, next) => {
       return res.status(404).json({ message: 'The specified hospital does not exist' });
     }
 
+    
     // Check if email already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -93,8 +94,9 @@ exports.registerDoctor = async (req, res, next) => {
     if (existingDoctor) {
       return res.status(400).json({ message: 'Medical License Number already registered' });
     }
-
+    
     const hashedPassword = await bcrypt.hash(password, 10);
+    
 
     // Create a User first
     const user = new User({
@@ -113,7 +115,7 @@ exports.registerDoctor = async (req, res, next) => {
       phoneNumber,
       gender,
       medicalLicenseNumber,
-      specialization,
+      cnic,
       department,
       hospitalAssociated: hospitalUser._id, // Associate with the correct hospital user
     });
@@ -124,6 +126,12 @@ exports.registerDoctor = async (req, res, next) => {
     const accessToken = generateToken(user._id, user.role);
     const refreshToken = generateRefreshToken(user._id, user.role);
 
+
+
+
+
+
+    
     await storeRefreshToken(refreshToken, user._id);
 
     // Sending tokens in cookies
@@ -238,8 +246,11 @@ exports.registerHospital = async (req, res, next) => {
 // Login Controller
 // Login Controller
 exports.login = async (req, res, next) => {
+  console.log("Login request received")
   try {
     const { email, password } = req.body;
+    console.log("email", email)
+    console.log("password", password);
 
     if (!email || !password) {
       return res.status(400).json({ message: 'Please provide email and password' });
@@ -299,6 +310,7 @@ exports.login = async (req, res, next) => {
         role: user.role,
         email: user.email,
         name: user.name,
+        profileImage: user.profileImage,
       }
     });
   } catch (err) {

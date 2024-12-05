@@ -1,6 +1,6 @@
 const express = require('express');
 const passport = require('passport');
-const { createPatient, viewPatient, viewPatientChat, getAllPatients, viewDoctorProfile } = require('../Controllers/doctor.controllers');
+const { createPatient, viewPatient, viewPatientChat, getAllPatients, viewDoctorProfile, searchPatientByCNIC } = require('../Controllers/doctor.controllers');
 const errorMiddleware = require('../middleware/error.middleware');
 
 const router = express.Router();
@@ -10,7 +10,7 @@ router.post('/createPatient', passport.authenticate('jwt', { session: false }), 
 
 
 // Route to view patient details
-router.get('/patients/:patientId', passport.authenticate('jwt', { session: false }), viewPatient);
+router.get('/patientDetails', passport.authenticate('jwt', { session: false }), viewPatient);
 
 
 // Route to get all patients for the authenticated doctor
@@ -18,11 +18,17 @@ router.get('/allpatients', passport.authenticate('jwt', { session: false }), get
 
 
 // Route to view patient chat history
-router.get('/patientsChat/:id', passport.authenticate('jwt', { session: false }), viewPatientChat);
+router.get('/patientsChat', passport.authenticate('jwt', { session: false }), viewPatientChat);
 
 
 // Route to view doctor profile
 router.get('/profile', passport.authenticate('jwt', { session: false }), viewDoctorProfile);
+
+
+// Route to search for a patient by CNIC
+router.post('/searchPatient', 
+  passport.authenticate('jwt', { session: false }), 
+  searchPatientByCNIC);
 
 
 
